@@ -1,14 +1,6 @@
 import json
 from pprint import pprint
 '''
--------------------------------------------------------------
-
-Autor das Resoluções:
-
-Sabrina Reis Hablocher RA : 1904458
-
-
--------------------------------------------------------------
 
 Nessa atividade, vamos usar dados do campeonato brasileiro 2018
 (brasileirao) para estudar como acessar listas,
