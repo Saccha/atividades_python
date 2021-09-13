@@ -169,7 +169,16 @@ Por exemplo, evolucao_anterior('venusaur') == 'ivysaur'
 Retorne None se o pokémon não tem evolução anterior. Por exemplo, evolucao_anterior('bulbasaur') == None
 """
 def evolucao_anterior(nome):
-    pass
+    check_str(nome)
+    id = numero_do_pokemon(nome)
+    pokemon = api.get(f"{site_pokeapi}/api/v2/pokemon-species/{id}")
+    if pokemon.status_code == 404:
+        raise PokemonNaoExisteException()
+
+    result = pokemon.json()
+    return result["evolves_from_species"]['name'] if "evolves_from_species" in result and result["evolves_from_species"] else None
+
+
 
 """
 7. Dado o nome de um pokémon, liste para quais pokémons ele pode evoluiur.
