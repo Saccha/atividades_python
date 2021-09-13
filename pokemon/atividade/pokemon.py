@@ -1,5 +1,7 @@
 import requests
 from dataclasses import dataclass
+from requests import api
+
 
 """
 Instruções para TODOS os exercícios/funções abaixo:
