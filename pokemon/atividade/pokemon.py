@@ -102,19 +102,37 @@ dic_tipos = {
 1. Dado o número de um pokémon, qual é o nome dele?
 """
 def nome_do_pokemon(numero):
-    pass
+    if numero < 1 or numero >= 5000:
+        raise PokemonNaoExisteException()
+    uri = f"{site_pokeapi}/api/v2/pokemon/{numero}"
+    response = api.get(uri)
+    if response.status_code != 200:
+        raise PokemonNaoExisteException()
+    return response.json()["name"]
 
 """
 2. Dado o nome de um pokémon, qual é o número dele?
 """
 def numero_do_pokemon(nome):
-    pass
+    url = f'https://pokeapi.co/api/v2/pokemon/{nome}/'.lower()
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        dic = resp.json()
+        return dic['id']
+    else:
+        raise PokemonNaoExisteException
 
 """
 3. Dado o nome ou número de um pokémon, qual é o nome da cor (em inglês) predominante dele?
 """
 def color_of_pokemon(nome):
-    pass
+     url = f'https://pokeapi.co/api/v2/pokemon-species/{nome}/'.lower()
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        dic = resp.json()
+        return dic['color']['name']
+    else:
+        raise PokemonNaoExisteException
 
 """
 4. Dado o nome ou número de um pokémon, qual é o nome da cor (em português) predominante dele?
@@ -122,7 +140,8 @@ Os nomes de cores possíveis em português são "marrom", "amarelo", "azul", "ro
 No entanto, a pokeapi ainda não foi traduzida para o português! Como você pode dar um jeito nisso?
 """
 def cor_do_pokemon(nome):
-    pass
+    cor_traducao = color_of_pokemon(nome)
+    return dic_cores[cor_traducao]
 
 
 
@@ -133,7 +152,16 @@ Todo pokémon pode pertencer a um ou a dois tipos diferentes. Retorne uma lista 
 Se houver dois tipos, a ordem não é importante.
 """
 def tipos_do_pokemon(nome):
-    pass
+    url = f'https://pokeapi.co/api/v2/pokemon/{nome}/'.lower()
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        dic = resp.json()
+        tipos = []
+        for x in (dic['types']):
+            tipos.append(dic_tipos[x['type']['name']])
+        return tipos
+    else:
+        raise PokemonNaoExisteException
 
 """
 6. Dado o nome de um pokémon, liste de qual pokémon ele evoluiu.
