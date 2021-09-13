@@ -194,7 +194,31 @@ Se o pokémon não evolui, retorne uma lista vazia. Por exemplo, evolucoes_proxi
 O exercicio 7 é opcional e bastante dificil. Se quiser, desligue os testes e vá para o 8!
 """
 def evolucoes_proximas(nome):
-    pass
+    check_str(nome)
+    id = numero_do_pokemon(nome)
+    pokemon = api.get(f"{site_pokeapi}/api/v2/pokemon-species/{id}/")
+    if pokemon.status_code == 404:
+        raise PokemonNaoExisteException()
+
+    pokemon = pokemon.json()
+    if "url" not in pokemon["evolution_chain"]:
+        return []
+    evolution_chain = api.get(pokemon["evolution_chain"]["url"])
+    evolution_chain = evolution_chain.json()
+    if len(evolution_chain["chain"]["evolves_to"]) <= 0:
+        return []
+
+    evolves = []
+    if evolution_chain["chain"]["species"]["name"] == nome.lower():
+        evolves = evolution_chain["chain"]["evolves_to"]
+    else:
+        for chain in evolution_chain["chain"]["evolves_to"]:
+            if chain["species"]["name"] == nome.lower():
+                evolves = chain["evolves_to"]
+    if len(evolves) <= 0:
+        return []
+
+    return [type_["species"]['name'] for type_ in evolves]
 
 """
 8. A medida que ganham pontos de experiência, os pokémons sobem de nível.
