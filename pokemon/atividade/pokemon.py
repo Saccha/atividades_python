@@ -229,7 +229,30 @@ Valores negativos de experiência devem ser considerados inválidos.
 dica: na URL pokemon-species, procure growth rate
 """
 def nivel_do_pokemon(nome, experiencia):
-    pass
+    id = numero_do_pokemon(nome)
+    pokemon = api.get(f"{site_pokeapi}/api/v2/pokemon-species/{id}/")
+    if pokemon.status_code == 404:
+        raise PokemonNaoExisteException()
+
+    pokemon = pokemon.json()
+    if "url" not in pokemon["growth_rate"]:
+        return 0
+    growth_rate = api.get(pokemon["growth_rate"]["url"])
+    growth_rate = growth_rate.json()
+    if len(growth_rate["levels"]) <= 0:
+        return 0
+
+    rate = -1
+    i = 0
+    growth_rate_len = len(growth_rate["levels"])
+    while experiencia >= rate:
+        if i == growth_rate_len:
+            break
+        rate = growth_rate["levels"][i]["experience"]
+        if rate <= experiencia:
+            i = i + 1
+
+    return growth_rate["levels"][i-1]["level"]
 
 """
 A partir daqui, você precisará rodar o servidor treinador.py na sua máquina para poder
@@ -252,7 +275,12 @@ dica: considere as linhas
       nelas você vê como usar o verbo put e como verificar o status code
 """
 def cadastrar_treinador(nome):
-    pass
+    treinador = api.get(f"{site_treinador}/treinador/{nome}")
+    if treinador.status_code == 200:
+        return False
+
+    treinador = api.put(f"{site_treinador}/treinador/{nome}")
+    return True if treinador.status_code == 202 else False
 
 """
 10. Imagine que você capturou dois pokémons do mesmo tipo. 
@@ -281,7 +309,21 @@ está fazendo um cadastro dobrado
 * Se voce receber um status 202, isso indica criação bem sucedida
 """
 def cadastrar_pokemon(nome_treinador, apelido_pokemon, tipo_pokemon, experiencia):
-    pass
+    treinador = api.get(f"{site_treinador}/treinador/{nome_treinador}")
+    if treinador.status_code == 404:
+        raise TreinadorNaoCadastradoException()
+    check_str(apelido_pokemon)
+    check_str(tipo_pokemon)
+    numero_do_pokemon(tipo_pokemon)
+    check_int(experiencia)
+    tipo_pokemon = tipo_pokemon.lower()
+    pokemon = api.get(
+        f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}")
+    if pokemon.status_code == 200:
+        raise PokemonJaCadastradoException()
+    payload = {"tipo": tipo_pokemon, "experiencia": experiencia}
+    api.put(
+        f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}", json=payload)
 
 """
 11. Dado um nome de treinador, um apelido de pokémon e uma quantidade de experiência, localize esse pokémon e acrescente-lhe a experiência ganha.
@@ -302,7 +344,21 @@ ou o treinador existe mas o pokemon não. Isso pode verificado acessando a respo
 O cod de status de sucesso é o 204
 """
 def ganhar_experiencia(nome_treinador, apelido_pokemon, experiencia):
-    pass
+     treinador = api.get(f"{site_treinador}/treinador/{nome_treinador}")
+    if treinador.status_code == 404:
+        raise TreinadorNaoCadastradoException()
+
+    check_str(apelido_pokemon)
+    pokemon = api.get(
+        f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}")
+    if pokemon.status_code != 200:
+        raise PokemonNaoCadastradoException()
+
+    check_int(experiencia)
+    pokemon = pokemon.json()
+    api.post(f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}/exp",
+             json={'experiencia': experiencia})
+
 
 """
 Esta classe será utilizada no exercício 12 abaixo.
