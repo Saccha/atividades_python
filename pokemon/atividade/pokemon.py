@@ -408,7 +408,15 @@ Consulte ela com seu navegador e veja o que tem lá! (talvez você queira usar
 as funções anteriores para criar um treinador e seus pokemons...)
 """
 def detalhar_treinador(nome_treinador):
-    pass
+    treinador = api.get(f"{site_treinador}/treinador/{nome_treinador}")
+    if treinador.status_code != 200:
+        raise TreinadorNaoCadastradoException()
+    pokemons = {}
+    treinador = treinador.json()
+    if len(treinador["pokemons"]) > 0:
+        for pokemon in treinador["pokemons"]:
+            pokemons[pokemon] = (treinador["pokemons"][pokemon]["tipo"])
+    return pokemons
 
 """
 14. Dado o nome de um treinador, localize-o na API do treinador e exclua-o, juntamente com todos os seus pokémons.
