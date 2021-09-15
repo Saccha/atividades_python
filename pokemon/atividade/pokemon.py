@@ -171,7 +171,6 @@ Por exemplo, evolucao_anterior('venusaur') == 'ivysaur'
 Retorne None se o pokémon não tem evolução anterior. Por exemplo, evolucao_anterior('bulbasaur') == None
 """
 def evolucao_anterior(nome):
-    check_str(nome)
     id = numero_do_pokemon(nome)
     pokemon = api.get(f"{site_pokeapi}/api/v2/pokemon-species/{id}")
     if pokemon.status_code == 404:
@@ -194,7 +193,6 @@ Se o pokémon não evolui, retorne uma lista vazia. Por exemplo, evolucoes_proxi
 O exercicio 7 é opcional e bastante dificil. Se quiser, desligue os testes e vá para o 8!
 """
 def evolucoes_proximas(nome):
-    check_str(nome)
     id = numero_do_pokemon(nome)
     pokemon = api.get(f"{site_pokeapi}/api/v2/pokemon-species/{id}/")
     if pokemon.status_code == 404:
@@ -312,10 +310,7 @@ def cadastrar_pokemon(nome_treinador, apelido_pokemon, tipo_pokemon, experiencia
     treinador = api.get(f"{site_treinador}/treinador/{nome_treinador}")
     if treinador.status_code == 404:
         raise TreinadorNaoCadastradoException()
-    check_str(apelido_pokemon)
-    check_str(tipo_pokemon)
     numero_do_pokemon(tipo_pokemon)
-    check_int(experiencia)
     tipo_pokemon = tipo_pokemon.lower()
     pokemon = api.get(
         f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}")
@@ -347,14 +342,10 @@ def ganhar_experiencia(nome_treinador, apelido_pokemon, experiencia):
      treinador = api.get(f"{site_treinador}/treinador/{nome_treinador}")
     if treinador.status_code == 404:
         raise TreinadorNaoCadastradoException()
-
-    check_str(apelido_pokemon)
     pokemon = api.get(
         f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}")
     if pokemon.status_code != 200:
         raise PokemonNaoCadastradoException()
-
-    check_int(experiencia)
     pokemon = pokemon.json()
     api.post(f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}/exp",
              json={'experiencia': experiencia})
