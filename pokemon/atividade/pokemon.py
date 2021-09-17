@@ -418,6 +418,7 @@ O status code vai de informar se o treinador não existia (com qual status code?
 Para enviar um request com o verbo delete, use requests.delete(url)
 """
 def excluir_treinador(nome_treinador):
+    check_str(nome_treinador)
     treinador = api.get(f"{site_treinador}/treinador/{nome_treinador}")
     if treinador.status_code != 200:
         raise TreinadorNaoCadastradoException()
@@ -426,6 +427,7 @@ def excluir_treinador(nome_treinador):
         for apelido_pokemon in pokemons:
             excluir_pokemon(nome_treinador, apelido_pokemon)
     api.delete(f"{site_treinador}/treinador/{nome_treinador}")
+    
 """
 15. Dado o nome de um treinador e o apelido de um de seus pokémons, localize o pokémon na API do treinador e exclua-o.
 
@@ -434,7 +436,16 @@ O status code vai de informar se o treinador não existe, ou se o pokemon nao ex
 (status code 404, não deixe de verificar se foi o pokemon ou treinador que não existia)
 """
 def excluir_pokemon(nome_treinador, apelido_pokemon):
-    pass
+    check_str(nome_treinador)
+    treinador = api.get(f"{site_treinador}/treinador/{nome_treinador}")
+    if treinador.status_code != 200:
+        raise TreinadorNaoCadastradoException()
+    check_str(apelido_pokemon)
+    pokemon = api.get(
+        f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}")
+    if pokemon.status_code != 200:
+        raise PokemonNaoCadastradoException()
+    api.delete(f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}")
 
 
 #ignore o código a seguir, ele só existe por motivos burocráticos do professor
