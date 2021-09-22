@@ -1,5 +1,8 @@
+import sqlite3
 from sqlalchemy import create_engine
 from sqlalchemy.sql import text
+
+engine = create_engine('sqlite:///rpg.db')
 
 class ItemNaoExisteException(Exception):
     pass
@@ -21,26 +24,20 @@ criar)
 3 testes, agora é um só testando tudo!)
 '''
 
-def consultar_item(id_item):
-    connection = sqlite3.connect("rpg.db")
-    cursor = connection.cursor()
+def item_existe(id):
+    with engine.connect() as conexao:
+        sql = f'SELECT * FROM Item WHERE id = {id}'
+        resultado = conexao.execute(sql, id=id)
+        item = resultado.fetchone() # Pegando a primeira linha.
+        return False if item is None else True
 
-    sql = "SELECT * FROM Item WHERE id = (?)"
-    cursor.execute(sql, [id_item])
-
-    item = cursor.fetchone()
-    if item is None:
+def consultar_item(id):
+    if item_existe(id):
+        with engine.connect() as conexao:
+            sql = f'SELECT * FROM Item WHERE id = {id}'
+            resultado = conexao.execute(sql, id=id)
+            item = resultado.fetchone() # Pegando a primeira linha.
+            return False if id is None else dict(item)
+    else:
         raise ItemNaoExisteException
-
-    connection.close()
-    item = {
-        'id': item[0],
-        'nome': item[1],
-        'tipo': item[2],
-        'fisico': item[3],
-        'magia': item[4],
-        'agilidade': item[5],
-        'emUso': item[6]
-    }
-    return item
 
