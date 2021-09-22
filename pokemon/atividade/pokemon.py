@@ -388,7 +388,22 @@ Podemos construir um objeto do tipo pokemon assim:
 Pokemon(nome_treinador, apelido_pokemon, tipo, experiencia, nivel_do_pokemon(tipo, experiencia), cor_do_pokemon(tipo), evolucao_anterior(tipo))
 """
 def localizar_pokemon(nome_treinador, apelido_pokemon):
-    pass
+    r = requests.get(f"{site_treinador}/treinador/{nome_treinador}/{apelido_pokemon}")
+    if r.status_code != 404:
+        dic = r.json()
+        tipo = dic["tipo"]
+        experiencia = dic["experiencia"]
+        nivel = nivel_do_pokemon(tipo, experiencia)
+        cor = cor_do_pokemon(tipo)
+        evoluiu_de = evolucao_anterior(tipo)
+        pokemon = Pokemon(nome_treinador, apelido_pokemon, tipo, experiencia, nivel, cor, evoluiu_de)
+        return pokemon
+    else:
+        erro = requests.get(f"{site_treinador}/treinador/{nome_treinador}")
+        if erro.status_code == 404:
+            raise TreinadorNaoCadastradoException
+        else:
+            raise PokemonNaoCadastradoException
 
 """
 13. Dado o nome de um treinador, localize-o na API do treinador e retorne um dicionário dos seus pokemons. As chaves do dicionário serão os apelidos dos pokémons dele, e os valores serão os tipos (pikachu, bulbasaur ...) deles.
