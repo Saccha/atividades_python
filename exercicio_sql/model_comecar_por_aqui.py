@@ -107,19 +107,14 @@ fazer a funcao abaixo - pode ser útil definir uma
 nova função de acesso ao banco, chamada consultar_heroi_por_nome,
 no arquivo herois
 '''
-def heroi_pronto_por_nome(nomeHeroi):
-    ataques = floor(atacante['agilidade'] / defensor['agilidade'])
-    if ataques <= 0:
-        defensor['vida'] = defensor['vida'] - atacante['fisico']
-    else:
-        defensor['vida'] = defensor['vida'] - (atacante['fisico'] * ataques)
-    if defensor['vida'] <= 0:
-        defensor['vida'] = 0
-    mensagem_de_ataque_fisico(defensor['vida'],
-                              defensor['nome'],
-                              atacante['nome'])
-    return atacante, defensor
-
+ def heroi_pronto_por_nome(nh):
+        with engine.connect() as con:    
+        statement = text ("""SELECT * FROM heroi where nome = :nome_hero""") 
+        rs = con.execute(statement,nome_hero=nh) 
+        hero=rs.fetchone()        
+        if hero==None: 
+            raise HeroiNaoExisteException 
+    return hero
 
 '''
 Ex5 (ainda no model.py)
